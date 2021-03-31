@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Viewer Test</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/lib/fontawesome/css/all.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/pages/folders-viewer.html">Image Viewer Test</a>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="loading-container">
+            <div class="spiners-area">
+                <div class="spinner-grow text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-secondary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-dark" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <main role="main" class="pb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">Home</li>
+                </ol>
+            </nav>
+
+            <div class="mb-3">
+                <label class="form-label">Set number of excluded folders</label>
+                <select class="form-select blacklist" aria-label="number of excluded folders">
+                    <option value="0" selected>All</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <table class="table viewer-table">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5">
+                                <nav class="pagination-nav">
+                                    <ul class="pagination"></ul>
+                                </nav>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted"></footer>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/js/enums/enums.js"></script>
+    <script src="/js/models/models.js"></script>
+
+    <script src="/js/services/loading-service.js"></script>
+    <script src="/js/services/data-service.js"></script>
+    <script src="/js/services/viewer-table-service.js"></script>
+    <script>
+        var data = new DataService();
+        var tableViewer = new ViewerTableService();
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            LoadingService.start();
+            tableViewer.init();
+            initPage();
+            addHandleBlackList();
+        });
+
+        function initPage(page = 1, blacklistNumber = 0) {
+            data.getFolders(page, blacklistNumber).then(res => {
+                if (res) {
+                    const tbody = document.querySelector("tbody");
+                    tbody.innerHTML = '';
+
+                    const pagination = tableViewer.setPagination(res.pageInfo);
+                    addHandlePagination(pagination);
+
+                    tableViewer.visualizeData(res.folders);
+                    tableViewer.initBlackList(res.blackListCount);
+                    LoadingService.finish();
+                } else {
+                    alert("Page content not found!");
+                    LoadingService.finish();
+                }
+            });
+        }
+
+        function addHandleBlackList() {
+            const blacklistSelect = document.querySelector(".blacklist");
+
+            if (blacklistSelect) {
+                blacklistSelect.addEventListener("change", event => {
+                    const currentPage = document.querySelector(".page-item.active").querySelector('span').textContent;
+                    const blacklistNumber = event.target.value;
+
+                    initPage(currentPage, blacklistNumber);
+                });
+            }
+        }
+
+        function addHandlePagination(pagination) {
+            const pageItems = pagination.querySelectorAll(".page-item");
+            pageItems.forEach(item => {
+                item.addEventListener("click", event => {
+                    const item = event.target;
+                    const currentPage = pagination.querySelector(".page-item.active");
+                    let page = 0;
+
+                    if (item && currentPage) {
+                        if (item.textContent == '«') {
+                            page = +currentPage.textContent - 1;
+                        } else if (item.textContent == '»') {
+                            page = +currentPage.textContent + 1;
+                        } else {
+                            page = +item.textContent;
+                        }
+
+                        let blacklistNumber = document.querySelector('.blacklist').value;
+                        initPage(page, blacklistNumber);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Viewer Test</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/lib/fontawesome/css/all.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/pages/folders-viewer.html">Image Viewer Test</a>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="loading-container">
+            <div class="spiners-area">
+                <div class="spinner-grow text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-secondary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-success" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow text-dark" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <main role="main" class="pb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/pages/folders-viewer.html">Home</a></li>
+                </ol>
+            </nav>
+
+            <div class="mb-3">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <table class="table viewer-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col"></th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Size</th>
+                                    <th scope="col">Modified</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="img-zoom-container">
+                            <div class="text-center img-uploading">
+                                <div class="spinner-border text-danger" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <img class="img-zoom" src="/images/nothing-to-see.jpg" />
+                            <div class="controls-container">
+                                <button class="img-control-btn" id="prev-btn">
+                                    <i class="fas fa-chevron-circle-left"></i>
+                                </button>
+                                <button class="img-control-btn" id="reverse-btn">
+                                    <i class="fas fa-undo-alt"></i>
+                                </button>
+                                <button class="img-control-btn" id="download-btn">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <button class="img-control-btn" id="next-btn">
+                                    <i class="fas fa-chevron-circle-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted"></footer>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+
+    <script src="/js/enums/enums.js"></script>
+    <script src="/js/models/models.js"></script>
+
+    <script src="/js/services/loading-service.js"></script>
+    <script src="/js/services/viewer-table-service.js"></script>
+    <script src="/js/services/viewer-image-service.js"></script>
+    <script src="/js/services/data-service.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            LoadingService.start();
+            var imageViewer = new ViewerImageService();
+            var data = new DataService();
+            var tableViewer = new ViewerTableService();
+
+            imageViewer.init();
+            tableViewer.init();
+
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const folder = urlParams.get("folder");
+
+            addBreadCrumbs(folder);
+
+            data.getImages(folder).then(imgs => {
+                imageViewer.initData(imgs);
+                tableViewer.visualizeData(imgs);
+                LoadingService.finish();
+            });
+        });
+
+        function addBreadCrumbs(folder) {
+            const breadcrumb = document.querySelector(".breadcrumb");
+            
+            if (breadcrumb) {
+                const element = document.createElement("li");
+                element.classList.add("breadcrumb-item");
+                element.classList.add("active");
+                element.setAttribute("aria-current", "page");
+                element.textContent = folder;
+                breadcrumb.appendChild(element);
+            }
+        }
+    </script>
+</body>
+</html>
