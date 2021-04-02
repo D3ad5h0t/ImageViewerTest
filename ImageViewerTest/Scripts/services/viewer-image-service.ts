@@ -3,15 +3,19 @@
     static offset = [0, 0];
     static mousePosition: number[];
     static dataList: ImageFile[] = [];
+    static imgTable: HTMLElement;
     static imgContainer: HTMLElement;
+    static controlsContainer: HTMLElement;
     static img: HTMLImageElement;
     defaultImgPath = "/images/nothing-to-see.jpg";
 
-    public init() {
-        ViewerImageService.imgContainer = document.querySelector(".img-zoom-container") as HTMLElement;
+    public init(zoomContainer: string, tableId: string) {
+        ViewerImageService.imgContainer = document.querySelector(`#${zoomContainer}`) as HTMLElement;
+        ViewerImageService.controlsContainer = ViewerImageService.imgContainer.querySelector("#controls-container") as HTMLElement;
+        ViewerImageService.imgTable = ViewerTableService.getTable(tableId);
 
         if (ViewerImageService.imgContainer) {
-            ViewerImageService.img = ViewerImageService.imgContainer.querySelector(".img-zoom") as HTMLImageElement;
+            ViewerImageService.img = ViewerImageService.imgContainer.querySelector("#img-zoom") as HTMLImageElement;
             const maxHeight = ViewerImageService.img.offsetHeight;
 
             ViewerImageService.imgContainer.style.height = `${maxHeight}px`;
@@ -82,17 +86,17 @@
     }
 
     private setControlPanelEvents() {
-        const downloadBtn = document.querySelector("#download-btn");
+        const downloadBtn = ViewerImageService.controlsContainer.querySelector("#download-btn");
         if (downloadBtn) {
             downloadBtn.addEventListener("click", this.downloadSelectedImage);
         }
 
-        const reverseBtn = document.querySelector("#reverse-btn");
+        const reverseBtn = ViewerImageService.controlsContainer.querySelector("#reverse-btn");
         if (reverseBtn) {
             reverseBtn.addEventListener("click", this.reverseImage);
         }
 
-        const prevBtn = document.querySelector("#prev-btn");
+        const prevBtn = ViewerImageService.controlsContainer.querySelector("#prev-btn");
         if (prevBtn) {
             prevBtn.addEventListener("click", () => {
                 this.getPrevImage().then(item => {
@@ -101,14 +105,14 @@
                     }
 
                     this.showSelected(item);
-                    const row = document.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
-                    this.selectRow(row);
+                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
+                    ViewerTableService.selectRow(row);
                 });
 
             });
         }
 
-        const nextBtn = document.querySelector("#next-btn");
+        const nextBtn = ViewerImageService.controlsContainer.querySelector("#next-btn");
         if (nextBtn) {
             nextBtn.addEventListener("click", () => {
                 this.getNextImage().then(item => {
@@ -117,23 +121,10 @@
                     }
 
                     this.showSelected(item);
-                    const row = document.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
-                    this.selectRow(row);
+                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
+                    ViewerTableService.selectRow(row);
                 });
             });
-        }
-    }
-
-    private selectRow(row: HTMLElement) {
-        if (row && !row.classList.contains("br-primary")) {
-            const table = document.getElementsByClassName("viewer-table")[0];
-            const oldSelectedRow = table.querySelector(".bg-primary");
-
-            if (oldSelectedRow) {
-                oldSelectedRow.classList.remove("bg-primary");
-            }
-
-            row.classList.add("bg-primary");
         }
     }
 
@@ -163,8 +154,7 @@
 
     private showControlPanel() {
         if (!ViewerImageService.img.src.includes(this.defaultImgPath)) {
-            const container = document.querySelector(".controls-container") as HTMLElement;
-            container.style.visibility = "initial";
+            ViewerImageService.controlsContainer.style.visibility = "initial";
         }
     }
 
@@ -175,13 +165,12 @@
             !target.classList.contains("img-zoom") &&
             !target.classList.contains("fas") &&
             !target.classList.contains("download-link")) {
-            const container = document.querySelector(".controls-container") as HTMLElement;
-            container.style.visibility = "hidden";
+            ViewerImageService.controlsContainer.style.visibility = "hidden";
         }
     }
 
     private async getPrevImage() {
-        const selectedRow = document.querySelector(".viewer-table").querySelector(".bg-primary") as HTMLElement;
+        const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary") as HTMLElement;
 
         if (selectedRow && selectedRow.dataset) {
             const currentIndex = +selectedRow.dataset['index'];
@@ -194,7 +183,7 @@
     }
 
     private async getNextImage() {
-        const selectedRow = document.querySelector(".viewer-table").querySelector(".bg-primary") as HTMLElement;
+        const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary") as HTMLElement;
 
         if (selectedRow && selectedRow.dataset) {
             let currentIndex = parseInt(selectedRow.dataset['index']);
@@ -245,7 +234,7 @@
 
     public showSelected(image: ImageFile) {
         if (ViewerImageService.img) {
-            const uploading = document.querySelector(".img-uploading") as HTMLElement;
+            const uploading = document.querySelector("#img-uploading") as HTMLElement;
             if (uploading) {
                 uploading.style.display = 'block';
             }

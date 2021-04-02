@@ -17,7 +17,7 @@
         </nav>
     </header>
     <div class="container">
-        <div class="loading-container">
+        <div class="loading-container" id="loading-container">
             <div class="spiners-area">
                 <div class="spinner-grow text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
@@ -54,13 +54,13 @@
 
             <div class="mb-3">
                 <label class="form-label">Set number of excluded folders</label>
-                <select class="form-select blacklist" aria-label="number of excluded folders">
+                <select class="form-select" id="blacklist" aria-label="number of excluded folders">
                     <option value="0" selected>All</option>
                 </select>
             </div>
 
             <div class="mb-3">
-                <table class="table viewer-table" id="table-view">
+                <table class="table viewer-table" id="table-view-1">
                     <thead>
                         <tr>
                             <th scope="col"></th>
@@ -75,7 +75,7 @@
                         <tr>
                             <td colspan="5">
                                 <nav class="pagination-nav">
-                                    <ul class="pagination"></ul>
+                                    <ul class="pagination" id="pagination-1"></ul>
                                 </nav>
                             </td>
                         </tr>
@@ -102,7 +102,7 @@
 
         document.addEventListener("DOMContentLoaded", async () => {
             LoadingService.start();
-            tableViewer.init();
+            tableViewer.init("table-view-1", 'pagination-1');
             initPage();
             addHandleBlackList();
         });
@@ -127,7 +127,7 @@
         }
 
         function addHandleBlackList() {
-            const blacklistSelect = document.querySelector(".blacklist");
+            const blacklistSelect = document.querySelector("#blacklist");
 
             if (blacklistSelect) {
                 blacklistSelect.addEventListener("change", event => {
@@ -156,7 +156,7 @@
                             page = +item.textContent;
                         }
 
-                        let blacklistNumber = document.querySelector('.blacklist').value;
+                        let blacklistNumber = document.querySelector('#blacklist').value;
                         initPage(page, blacklistNumber);
                     }
                 });

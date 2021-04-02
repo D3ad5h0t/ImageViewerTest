@@ -1,17 +1,44 @@
 ﻿class ViewerTableService {
 
     static tableView: HTMLElement;
+    static pagination: HTMLElement;
 
-    public init() {
-        ViewerTableService.tableView = this.getTable();
+    public init(tableId: string, paginationId: string) {
+        ViewerTableService.tableView = ViewerTableService.getTable(tableId);
+        ViewerTableService.pagination = document.querySelector(`#${paginationId}`) as HTMLElement;
+    }
 
-        if (ViewerTableService.tableView) {
-            const rows = ViewerTableService.tableView.querySelector("tbody").querySelectorAll("tr");
+    public static getTable(tableId: string) {
+        return document.querySelector(`#${tableId}`) as HTMLElement;
+    }
+
+    public static selectRow(row: HTMLElement) {
+        if (!row.classList.contains("br-primary")) {
+            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
+
+            if (oldSelectedRow) {
+                oldSelectedRow.classList.remove("bg-primary");
+            }
+
+            row.classList.add("bg-primary");
+        }
+    }
+
+    public visualizeData(files: Array<BaseObject>) {
+        const tbody = ViewerTableService.tableView.querySelector("tbody");
+
+        if (tbody) {
+            files.forEach((file, index) => {
+                const row = this.createTableRow(file, index);
+                tbody.appendChild(row);
+            });
+
+            const rows = tbody.querySelectorAll("tr");
 
             rows.forEach(row => {
                 row.addEventListener("click", event => {
                     const targetRow = event.currentTarget as HTMLElement;
-                    this.selectRow(targetRow);
+                    ViewerTableService.selectRow(targetRow);
                 });
 
                 row.addEventListener("dblclick", event => {
@@ -27,41 +54,9 @@
         }
     }
 
-    private getTable() {
-        return document.querySelector(".viewer-table") as HTMLElement;
-    }
-
-    public selectRow(row: HTMLElement) {
-        if (!row.classList.contains("br-primary")) {
-            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
-
-            if (oldSelectedRow) {
-                oldSelectedRow.classList.remove("bg-primary");
-            }
-
-            row.classList.add("bg-primary");
-        }
-    }
-
-    public visualizeData(files: Array<BaseObject>) {
-        if (!ViewerTableService.tableView) {
-            ViewerTableService.tableView = this.getTable();
-        }
-        const tbody = ViewerTableService.tableView.querySelector("tbody");
-
-        if (tbody) {
-            files.forEach((file, index) => {
-                const row = this.createTableRow(file, index);
-                tbody.appendChild(row);
-            });
-
-            new ViewerTableService().init();
-        }
-    }
-
     public initBlackList(count: number) {
         if (count > -1) {
-            const blackList = document.querySelector(".blacklist");
+            const blackList = document.querySelector("#blacklist");
 
             if (blackList.children.length > 1) {
                 return;
@@ -96,7 +91,6 @@
                     type = "folder";
                     break;
                 }
-
         }
 
         tr.appendChild(this.getTableCell(type, 'type'));
@@ -175,42 +169,40 @@
     }
 
     public setPagination(pageInfo: PageInfo) {
-        const pagination = document.querySelector(".pagination");
-
-        if (pagination) {
-            pagination.innerHTML = '';
+        if (ViewerTableService.pagination) {
+            ViewerTableService.pagination.innerHTML = '';
             const prev = this.createPaginationItem("&laquo;");
-            pagination.appendChild(prev);
+            ViewerTableService.pagination.appendChild(prev);
 
             for (let i = 1; i < pageInfo.totalPages + 1; i++) {
                 const item = this.getPageNumberItem(i, pageInfo.pageNumber);
-                pagination.appendChild(item);
+                ViewerTableService.pagination.appendChild(item);
             }
 
             this.setVisibleNearestPages(pageInfo);
 
             const next = this.createPaginationItem("&raquo");
-            pagination.appendChild(next);
+            ViewerTableService.pagination.appendChild(next);
 
-            return pagination;
+            return ViewerTableService.pagination;
         }
     }
 
     private setVisibleNearestPages(pageInfo: PageInfo) {
-        const currentPage = document.querySelector(".page-item.active");
+        const currentPage = ViewerTableService.pagination.querySelector(".page-item.active");
 
         if (currentPage) {
             currentPage.classList.remove("hidden-item");
 
             if (pageInfo.pageNumber > 1 && pageInfo.pageNumber < pageInfo.totalPages) {
-                document.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)?.classList.remove("hidden-item");
-                document.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)?.classList.remove("hidden-item");
             } else if (pageInfo.pageNumber == 1) {
-                document.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)?.classList.remove("hidden-item");
-                document.querySelector(`.page-item-${pageInfo.pageNumber + 2}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 2}`)?.classList.remove("hidden-item");
             } else if (pageInfo.pageNumber == pageInfo.totalPages) {
-                document.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)?.classList.remove("hidden-item");
-                document.querySelector(`.page-item-${pageInfo.pageNumber - 2}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)?.classList.remove("hidden-item");
+                ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 2}`)?.classList.remove("hidden-item");
             }
         }
     }

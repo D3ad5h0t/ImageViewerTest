@@ -1,12 +1,32 @@
 class ViewerTableService {
-    init() {
-        ViewerTableService.tableView = this.getTable();
-        if (ViewerTableService.tableView) {
-            const rows = ViewerTableService.tableView.querySelector("tbody").querySelectorAll("tr");
+    init(tableId, paginationId) {
+        ViewerTableService.tableView = ViewerTableService.getTable(tableId);
+        ViewerTableService.pagination = document.querySelector(`#${paginationId}`);
+    }
+    static getTable(tableId) {
+        return document.querySelector(`#${tableId}`);
+    }
+    static selectRow(row) {
+        if (!row.classList.contains("br-primary")) {
+            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
+            if (oldSelectedRow) {
+                oldSelectedRow.classList.remove("bg-primary");
+            }
+            row.classList.add("bg-primary");
+        }
+    }
+    visualizeData(files) {
+        const tbody = ViewerTableService.tableView.querySelector("tbody");
+        if (tbody) {
+            files.forEach((file, index) => {
+                const row = this.createTableRow(file, index);
+                tbody.appendChild(row);
+            });
+            const rows = tbody.querySelectorAll("tr");
             rows.forEach(row => {
                 row.addEventListener("click", event => {
                     const targetRow = event.currentTarget;
-                    this.selectRow(targetRow);
+                    ViewerTableService.selectRow(targetRow);
                 });
                 row.addEventListener("dblclick", event => {
                     var _a, _b;
@@ -20,34 +40,9 @@ class ViewerTableService {
             });
         }
     }
-    getTable() {
-        return document.querySelector(".viewer-table");
-    }
-    selectRow(row) {
-        if (!row.classList.contains("br-primary")) {
-            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
-            if (oldSelectedRow) {
-                oldSelectedRow.classList.remove("bg-primary");
-            }
-            row.classList.add("bg-primary");
-        }
-    }
-    visualizeData(files) {
-        if (!ViewerTableService.tableView) {
-            ViewerTableService.tableView = this.getTable();
-        }
-        const tbody = ViewerTableService.tableView.querySelector("tbody");
-        if (tbody) {
-            files.forEach((file, index) => {
-                const row = this.createTableRow(file, index);
-                tbody.appendChild(row);
-            });
-            new ViewerTableService().init();
-        }
-    }
     initBlackList(count) {
         if (count > -1) {
-            const blackList = document.querySelector(".blacklist");
+            const blackList = document.querySelector("#blacklist");
             if (blackList.children.length > 1) {
                 return;
             }
@@ -135,37 +130,36 @@ class ViewerTableService {
         return th;
     }
     setPagination(pageInfo) {
-        const pagination = document.querySelector(".pagination");
-        if (pagination) {
-            pagination.innerHTML = '';
+        if (ViewerTableService.pagination) {
+            ViewerTableService.pagination.innerHTML = '';
             const prev = this.createPaginationItem("&laquo;");
-            pagination.appendChild(prev);
+            ViewerTableService.pagination.appendChild(prev);
             for (let i = 1; i < pageInfo.totalPages + 1; i++) {
                 const item = this.getPageNumberItem(i, pageInfo.pageNumber);
-                pagination.appendChild(item);
+                ViewerTableService.pagination.appendChild(item);
             }
             this.setVisibleNearestPages(pageInfo);
             const next = this.createPaginationItem("&raquo");
-            pagination.appendChild(next);
-            return pagination;
+            ViewerTableService.pagination.appendChild(next);
+            return ViewerTableService.pagination;
         }
     }
     setVisibleNearestPages(pageInfo) {
         var _a, _b, _c, _d, _e, _f;
-        const currentPage = document.querySelector(".page-item.active");
+        const currentPage = ViewerTableService.pagination.querySelector(".page-item.active");
         if (currentPage) {
             currentPage.classList.remove("hidden-item");
             if (pageInfo.pageNumber > 1 && pageInfo.pageNumber < pageInfo.totalPages) {
-                (_a = document.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)) === null || _a === void 0 ? void 0 : _a.classList.remove("hidden-item");
-                (_b = document.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)) === null || _b === void 0 ? void 0 : _b.classList.remove("hidden-item");
+                (_a = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)) === null || _a === void 0 ? void 0 : _a.classList.remove("hidden-item");
+                (_b = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)) === null || _b === void 0 ? void 0 : _b.classList.remove("hidden-item");
             }
             else if (pageInfo.pageNumber == 1) {
-                (_c = document.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)) === null || _c === void 0 ? void 0 : _c.classList.remove("hidden-item");
-                (_d = document.querySelector(`.page-item-${pageInfo.pageNumber + 2}`)) === null || _d === void 0 ? void 0 : _d.classList.remove("hidden-item");
+                (_c = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 1}`)) === null || _c === void 0 ? void 0 : _c.classList.remove("hidden-item");
+                (_d = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber + 2}`)) === null || _d === void 0 ? void 0 : _d.classList.remove("hidden-item");
             }
             else if (pageInfo.pageNumber == pageInfo.totalPages) {
-                (_e = document.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)) === null || _e === void 0 ? void 0 : _e.classList.remove("hidden-item");
-                (_f = document.querySelector(`.page-item-${pageInfo.pageNumber - 2}`)) === null || _f === void 0 ? void 0 : _f.classList.remove("hidden-item");
+                (_e = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 1}`)) === null || _e === void 0 ? void 0 : _e.classList.remove("hidden-item");
+                (_f = ViewerTableService.pagination.querySelector(`.page-item-${pageInfo.pageNumber - 2}`)) === null || _f === void 0 ? void 0 : _f.classList.remove("hidden-item");
             }
         }
     }

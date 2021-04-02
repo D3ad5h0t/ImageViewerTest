@@ -11,10 +11,12 @@ class ViewerImageService {
     constructor() {
         this.defaultImgPath = "/images/nothing-to-see.jpg";
     }
-    init() {
-        ViewerImageService.imgContainer = document.querySelector(".img-zoom-container");
+    init(zoomContainer, tableId) {
+        ViewerImageService.imgContainer = document.querySelector(`#${zoomContainer}`);
+        ViewerImageService.controlsContainer = ViewerImageService.imgContainer.querySelector("#controls-container");
+        ViewerImageService.imgTable = ViewerTableService.getTable(tableId);
         if (ViewerImageService.imgContainer) {
-            ViewerImageService.img = ViewerImageService.imgContainer.querySelector(".img-zoom");
+            ViewerImageService.img = ViewerImageService.imgContainer.querySelector("#img-zoom");
             const maxHeight = ViewerImageService.img.offsetHeight;
             ViewerImageService.imgContainer.style.height = `${maxHeight}px`;
             ViewerImageService.img.style.width = "100%";
@@ -67,15 +69,15 @@ class ViewerImageService {
         });
     }
     setControlPanelEvents() {
-        const downloadBtn = document.querySelector("#download-btn");
+        const downloadBtn = ViewerImageService.controlsContainer.querySelector("#download-btn");
         if (downloadBtn) {
             downloadBtn.addEventListener("click", this.downloadSelectedImage);
         }
-        const reverseBtn = document.querySelector("#reverse-btn");
+        const reverseBtn = ViewerImageService.controlsContainer.querySelector("#reverse-btn");
         if (reverseBtn) {
             reverseBtn.addEventListener("click", this.reverseImage);
         }
-        const prevBtn = document.querySelector("#prev-btn");
+        const prevBtn = ViewerImageService.controlsContainer.querySelector("#prev-btn");
         if (prevBtn) {
             prevBtn.addEventListener("click", () => {
                 this.getPrevImage().then(item => {
@@ -83,12 +85,12 @@ class ViewerImageService {
                         return;
                     }
                     this.showSelected(item);
-                    const row = document.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']");
-                    this.selectRow(row);
+                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']");
+                    ViewerTableService.selectRow(row);
                 });
             });
         }
-        const nextBtn = document.querySelector("#next-btn");
+        const nextBtn = ViewerImageService.controlsContainer.querySelector("#next-btn");
         if (nextBtn) {
             nextBtn.addEventListener("click", () => {
                 this.getNextImage().then(item => {
@@ -96,20 +98,10 @@ class ViewerImageService {
                         return;
                     }
                     this.showSelected(item);
-                    const row = document.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']");
-                    this.selectRow(row);
+                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']");
+                    ViewerTableService.selectRow(row);
                 });
             });
-        }
-    }
-    selectRow(row) {
-        if (row && !row.classList.contains("br-primary")) {
-            const table = document.getElementsByClassName("viewer-table")[0];
-            const oldSelectedRow = table.querySelector(".bg-primary");
-            if (oldSelectedRow) {
-                oldSelectedRow.classList.remove("bg-primary");
-            }
-            row.classList.add("bg-primary");
         }
     }
     startTrackingMouseMovement(event) {
@@ -133,8 +125,7 @@ class ViewerImageService {
     }
     showControlPanel() {
         if (!ViewerImageService.img.src.includes(this.defaultImgPath)) {
-            const container = document.querySelector(".controls-container");
-            container.style.visibility = "initial";
+            ViewerImageService.controlsContainer.style.visibility = "initial";
         }
     }
     hideControlPanel(event) {
@@ -144,13 +135,12 @@ class ViewerImageService {
             !target.classList.contains("img-zoom") &&
             !target.classList.contains("fas") &&
             !target.classList.contains("download-link")) {
-            const container = document.querySelector(".controls-container");
-            container.style.visibility = "hidden";
+            ViewerImageService.controlsContainer.style.visibility = "hidden";
         }
     }
     getPrevImage() {
         return __awaiter(this, void 0, void 0, function* () {
-            const selectedRow = document.querySelector(".viewer-table").querySelector(".bg-primary");
+            const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary");
             if (selectedRow && selectedRow.dataset) {
                 const currentIndex = +selectedRow.dataset['index'];
                 if (currentIndex && currentIndex >= 0 && currentIndex < ViewerImageService.dataList.length) {
@@ -162,7 +152,7 @@ class ViewerImageService {
     }
     getNextImage() {
         return __awaiter(this, void 0, void 0, function* () {
-            const selectedRow = document.querySelector(".viewer-table").querySelector(".bg-primary");
+            const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary");
             if (selectedRow && selectedRow.dataset) {
                 let currentIndex = parseInt(selectedRow.dataset['index']);
                 if (currentIndex >= 0 && currentIndex + 1 < ViewerImageService.dataList.length) {
@@ -206,7 +196,7 @@ class ViewerImageService {
     }
     showSelected(image) {
         if (ViewerImageService.img) {
-            const uploading = document.querySelector(".img-uploading");
+            const uploading = document.querySelector("#img-uploading");
             if (uploading) {
                 uploading.style.display = 'block';
             }
