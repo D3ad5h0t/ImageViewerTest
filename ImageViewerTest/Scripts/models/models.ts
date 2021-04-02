@@ -1,7 +1,7 @@
-﻿class BaseElement {
+﻿class BaseObject {
     name: string;
 
-    type: string;
+    type: ObjectType;
 
     size: number;
 
@@ -12,11 +12,11 @@
     icon?: string;
 }
 
-class ImageFile extends BaseElement {
+class ImageFile extends BaseObject {
     extension?: string;
 }
 
-class Folder extends BaseElement {
+class Folder extends BaseObject {
 
 }
 

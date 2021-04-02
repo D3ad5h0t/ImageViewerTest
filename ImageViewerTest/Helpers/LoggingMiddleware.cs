@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.Logging;
 using Serilog;
-using ILogger = Serilog.ILogger;
 
 namespace ImageViewerTest.Helpers
 {
@@ -27,6 +25,7 @@ namespace ImageViewerTest.Helpers
                 throw new ArgumentNullException(nameof(httpContext));
             }
 
+            var messageSb = new StringBuilder();
             var start = Stopwatch.GetTimestamp();
 
             await next(httpContext);
@@ -34,10 +33,16 @@ namespace ImageViewerTest.Helpers
 
             var statusCode = httpContext.Response?.StatusCode;
             var message = $"HTTP {httpContext.Request.Method} {GetPath(httpContext)} responded {statusCode} in {elapsedMs:0.0000} ms";
+            messageSb.Append(message);
 
             if (statusCode > 499)
             {
-                Log.Fatal(message);
+                var exceptionFeature = httpContext.Features.Get<IExceptionHandlerPathFeature>();
+                var errorMessage = exceptionFeature.Error.Message;
+                var details = exceptionFeature.Error.StackTrace;
+                messageSb.Append("\n").Append(errorMessage).Append("\n").Append(details).Append("\n");
+
+                Log.Fatal(messageSb.ToString());
             }
             else if(statusCode > 399 && statusCode < 500)
             {

@@ -1,15 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ImageViewerTest.Enums;
 using ImageViewerTest.Helpers;
 using ImageViewerTest.Services;
 using ImageViewerTest.ViewModels;
 using ImageViewerTest.ViewModes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace ImageViewerTest.Controllers
 {
@@ -64,74 +63,46 @@ namespace ImageViewerTest.Controllers
 
         private List<Folder> GetFolders(int page)
         {
-            try
-            {
-                List<Folder> list = folders.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                return list;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
-            }
-
-            return null;
+            List<Folder> list = folders.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return list;
         }
 
         private List<Folder> GetRootFolders(int blacklistNumber)
         {
             List<Folder> rootFolders = new List<Folder>();
+            string path = appEnvironment.ContentRootPath + config.Value.RootFolderPath;
+            DirectoryInfo rootDir = new DirectoryInfo(path);
 
-            try
+            var directories = rootDir.GetDirectories().ToList();
+            directories = blackListService.FilterByBlackList(directories, blacklistNumber);
+
+            foreach (var directory in directories)
             {
-                string path = appEnvironment.ContentRootPath + config.Value.RootFolderPath;
-                DirectoryInfo rootDir = new DirectoryInfo(path);
-
-                var directories = rootDir.GetDirectories().ToList();
-                directories = blackListService.FilterByBlackList(directories, blacklistNumber);
-
-                foreach (var directory in directories)
+                rootFolders.Add(new Folder
                 {
-                    rootFolders.Add(new Folder
-                    {
-                        Icon = "fa-folder",
-                        Name = directory.Name,
-                        Size = GetSize(directory),
-                        Modified = directory.CreationTime,
-                        Type = "folder",
-                        Url = directory.FullName
-                    });
-                }
-
-                return rootFolders;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
+                    Name = directory.Name,
+                    Size = GetSize(directory),
+                    Modified = directory.CreationTime,
+                    Type = ObjectType.Folder,
+                    Url = directory.FullName
+                });
             }
 
-            return null;
+            return rootFolders;
         }
 
         private long GetSize(DirectoryInfo directory)
         {
-            try
-            {
-                var files = Directory.GetFiles(directory.FullName);
-                long bytes = 0;
-                foreach (var file in files)
-                {
-                    FileInfo info = new FileInfo(file);
-                    bytes += info.Length;
-                }
+            var files = Directory.GetFiles(directory.FullName);
+            long bytes = 0;
 
-                return bytes / 1024;
-            }
-            catch (Exception e)
+            foreach (var file in files)
             {
-                Log.Error(e.Message);
+                FileInfo info = new FileInfo(file);
+                bytes += info.Length;
             }
 
-            return -1;
+            return bytes / 1024;
         }
     }
 }

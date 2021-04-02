@@ -1,10 +1,12 @@
 ﻿class ViewerTableService {
 
-    public init() {
-        const table = document.getElementsByClassName("viewer-table")[0];
+    static tableView: HTMLElement;
 
-        if (table) {
-            const rows = table.querySelector("tbody").querySelectorAll("tr");
+    public init() {
+        ViewerTableService.tableView = this.getTable();
+
+        if (ViewerTableService.tableView) {
+            const rows = ViewerTableService.tableView.querySelector("tbody").querySelectorAll("tr");
 
             rows.forEach(row => {
                 row.addEventListener("click", event => {
@@ -25,10 +27,13 @@
         }
     }
 
+    private getTable() {
+        return document.querySelector(".viewer-table") as HTMLElement;
+    }
+
     public selectRow(row: HTMLElement) {
         if (!row.classList.contains("br-primary")) {
-            const table = document.getElementsByClassName("viewer-table")[0];
-            const oldSelectedRow = table.querySelector(".bg-primary");
+            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
 
             if (oldSelectedRow) {
                 oldSelectedRow.classList.remove("bg-primary");
@@ -38,8 +43,11 @@
         }
     }
 
-    public visualizeData(files: Array<BaseElement>) {
-        const tbody = document.querySelector(".viewer-table").querySelector("tbody");
+    public visualizeData(files: Array<BaseObject>) {
+        if (!ViewerTableService.tableView) {
+            ViewerTableService.tableView = this.getTable();
+        }
+        const tbody = ViewerTableService.tableView.querySelector("tbody");
 
         if (tbody) {
             files.forEach((file, index) => {
@@ -68,25 +76,35 @@
         }
     }
 
-    private createTableRow(file: BaseElement, index: number) {
+    private createTableRow(file: BaseObject, index: number) {
 
         const tr = document.createElement("tr");
 
-        tr.appendChild(this.getIconCol(file.icon));
+        tr.appendChild(this.getIconCol(file.type));
         tr.appendChild(this.getTableCell(file.name, 'name'));
 
-        let type = '';
-        if (file.type == 'img') {
-            type = (file as ImageFile).extension;
-        } else {
-            type = file.type;
+        let type = 'file';
+
+        switch (file.type) {
+            case ObjectType.Image:
+                {
+                    type = (file as ImageFile).extension;
+                    break;
+                }
+            case ObjectType.Folder:
+                {
+                    type = "folder";
+                    break;
+                }
+
         }
+
         tr.appendChild(this.getTableCell(type, 'type'));
 
         tr.appendChild(this.getTableCell(file.size, 'size', " KB"));
         tr.appendChild(this.getTableCell(file.modified, 'modified'));
 
-        if (file.type == 'img') {
+        if (file.type == ObjectType.Image) {
             tr.dataset.url = file.url;
             tr.dataset.index = index.toString();
             new ViewerImageService().setEventRowClick(tr);
@@ -95,7 +113,7 @@
         return tr;
     }
 
-    private getTableCell(value, name, postfix="") {
+    private getTableCell(value, name, postfix = "") {
         const td = document.createElement("td") as HTMLElement;
         td.classList.add(`col-${name}`);
         let content = '';
@@ -131,9 +149,18 @@
         return newDate + ' ' + newTime;
     }
 
-    private getIconCol(icon: string) {
-        if (!icon) {
-            icon = "fa-file-alt";
+    private getIconCol(type: ObjectType) {
+        let icon = "fa-file-alt";
+
+        switch (type) {
+            case ObjectType.Folder: {
+                icon = "fa-folder";
+                break;
+            }
+            case ObjectType.Image: {
+                icon = "fa-file-image";
+                break;
+            }
         }
 
         const th = document.createElement("th") as HTMLElement;

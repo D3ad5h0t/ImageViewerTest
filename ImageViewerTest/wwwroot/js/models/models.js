@@ -1,8 +1,8 @@
-class BaseElement {
+class BaseObject {
 }
-class ImageFile extends BaseElement {
+class ImageFile extends BaseObject {
 }
-class Folder extends BaseElement {
+class Folder extends BaseObject {
 }
 class FolderView {
 }

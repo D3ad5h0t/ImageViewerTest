@@ -1,8 +1,8 @@
 class ViewerTableService {
     init() {
-        const table = document.getElementsByClassName("viewer-table")[0];
-        if (table) {
-            const rows = table.querySelector("tbody").querySelectorAll("tr");
+        ViewerTableService.tableView = this.getTable();
+        if (ViewerTableService.tableView) {
+            const rows = ViewerTableService.tableView.querySelector("tbody").querySelectorAll("tr");
             rows.forEach(row => {
                 row.addEventListener("click", event => {
                     const targetRow = event.currentTarget;
@@ -20,10 +20,12 @@ class ViewerTableService {
             });
         }
     }
+    getTable() {
+        return document.querySelector(".viewer-table");
+    }
     selectRow(row) {
         if (!row.classList.contains("br-primary")) {
-            const table = document.getElementsByClassName("viewer-table")[0];
-            const oldSelectedRow = table.querySelector(".bg-primary");
+            const oldSelectedRow = ViewerTableService.tableView.querySelector(".bg-primary");
             if (oldSelectedRow) {
                 oldSelectedRow.classList.remove("bg-primary");
             }
@@ -31,7 +33,10 @@ class ViewerTableService {
         }
     }
     visualizeData(files) {
-        const tbody = document.querySelector(".viewer-table").querySelector("tbody");
+        if (!ViewerTableService.tableView) {
+            ViewerTableService.tableView = this.getTable();
+        }
+        const tbody = ViewerTableService.tableView.querySelector("tbody");
         if (tbody) {
             files.forEach((file, index) => {
                 const row = this.createTableRow(file, index);
@@ -56,19 +61,25 @@ class ViewerTableService {
     }
     createTableRow(file, index) {
         const tr = document.createElement("tr");
-        tr.appendChild(this.getIconCol(file.icon));
+        tr.appendChild(this.getIconCol(file.type));
         tr.appendChild(this.getTableCell(file.name, 'name'));
-        let type = '';
-        if (file.type == 'img') {
-            type = file.extension;
-        }
-        else {
-            type = file.type;
+        let type = 'file';
+        switch (file.type) {
+            case ObjectType.Image:
+                {
+                    type = file.extension;
+                    break;
+                }
+            case ObjectType.Folder:
+                {
+                    type = "folder";
+                    break;
+                }
         }
         tr.appendChild(this.getTableCell(type, 'type'));
         tr.appendChild(this.getTableCell(file.size, 'size', " KB"));
         tr.appendChild(this.getTableCell(file.modified, 'modified'));
-        if (file.type == 'img') {
+        if (file.type == ObjectType.Image) {
             tr.dataset.url = file.url;
             tr.dataset.index = index.toString();
             new ViewerImageService().setEventRowClick(tr);
@@ -103,9 +114,17 @@ class ViewerTableService {
         const newTime = `${formatedDate.getHours()}:${formatedDate.getMinutes()}:${formatedDate.getSeconds()}`;
         return newDate + ' ' + newTime;
     }
-    getIconCol(icon) {
-        if (!icon) {
-            icon = "fa-file-alt";
+    getIconCol(type) {
+        let icon = "fa-file-alt";
+        switch (type) {
+            case ObjectType.Folder: {
+                icon = "fa-folder";
+                break;
+            }
+            case ObjectType.Image: {
+                icon = "fa-file-image";
+                break;
+            }
         }
         const th = document.createElement("th");
         th.classList.add("col-icon");

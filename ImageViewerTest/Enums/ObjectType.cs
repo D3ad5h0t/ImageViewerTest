@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ImageViewerTest.Models;
 
-namespace ImageViewerTest.ViewModels
+namespace ImageViewerTest.Enums
 {
-    public class Folder : BaseObject
+    public enum ObjectType
     {
+        Folder,
+        Image
     }
 }

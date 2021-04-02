@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using ImageViewerTest.Enums;
 using ImageViewerTest.Helpers;
 using ImageViewerTest.ViewModels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace ImageViewerTest.Controllers
 {
@@ -47,40 +45,26 @@ namespace ImageViewerTest.Controllers
         private List<Image> GetImages(string path, string folder)
         {
             List<Image> list = new List<Image>();
+            var images = Directory.GetFiles(path).Where(file => file.EndsWith(".jpg") ||
+                                                                 file.EndsWith(".png") ||
+                                                                 file.EndsWith(".svg"))
+                                                           .ToList();
 
-            try
+            foreach (var image in images)
             {
-                if (Directory.Exists(path))
+                var file = new FileInfo(image);
+                list.Add(new Image
                 {
-                    var images = Directory.GetFiles(path)
-                                                          .Where(file => file.EndsWith(".jpg") || 
-                                                                               file.EndsWith(".png") || 
-                                                                               file.EndsWith(".svg"))
-                                                          .ToList();
-                    foreach (var image in images)
-                    {
-                        var file = new FileInfo(image);
-                        list.Add(new Image
-                        {
-                            Name = file.Name,
-                            Icon = "fa-file-image",
-                            Modified = file.LastWriteTime,
-                            Size = file.Length / 1024,
-                            Type = "img",
-                            Extension = file.Extension,
-                            Url = $"/root-folder/{folder}/{file.Name}"
-                        });
-                    }
-
-                    return list;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e.Message);
+                    Name = file.Name,
+                    Modified = file.LastWriteTime,
+                    Size = file.Length / 1024,
+                    Type = ObjectType.Image,
+                    Extension = file.Extension,
+                    Url = $"/root-folder/{folder}/{file.Name}"
+                });
             }
 
-            return null;
+            return list;
         }
     }
 }
