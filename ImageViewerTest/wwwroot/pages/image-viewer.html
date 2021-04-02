@@ -55,7 +55,7 @@
             <div class="mb-3">
                 <div class="row">
                     <div class="col-lg-8">
-                        <table class="table viewer-table" id="table-view-2">
+                        <table class="table table-view" id="table-view-2">
                             <thead>
                                 <tr>
                                     <th scope="col"></th>
@@ -106,15 +106,15 @@
     <script src="/js/models/models.js"></script>
 
     <script src="/js/services/loading-service.js"></script>
-    <script src="/js/services/viewer-table-service.js"></script>
-    <script src="/js/services/viewer-image-service.js"></script>
-    <script src="/js/services/data-service.js"></script>
+    <script src="/js/services/overview-table-service.js"></script>
+    <script src="/js/services/image-viewer-service.js"></script>
+    <script src="/js/services/api-service.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", async () => {
             LoadingService.start();
-            var data = new DataService();
-            var tableViewer = new ViewerTableService();
-            var imageViewer = new ViewerImageService();
+            var data = new Api();
+            var tableViewer = new OverviewTable();
+            var imageViewer = new ImageViewer();
 
             tableViewer.init("table-view-2");
             imageViewer.init("img-zoom-container", "table-view-2");
@@ -125,7 +125,7 @@
 
             addBreadCrumbs(folder);
 
-            data.getImages(folder).then(imgs => {
+            data.images(folder).then(imgs => {
                 tableViewer.visualizeData(imgs);
                 imageViewer.initData(imgs);
                 LoadingService.finish();

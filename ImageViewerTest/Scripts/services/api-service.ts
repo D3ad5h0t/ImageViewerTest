@@ -1,5 +1,5 @@
-﻿class DataService {
-    public async getImages(folder: string): Promise<Array<ImageFile>> {
+﻿class Api {
+    public async images(folder: string): Promise<Array<ImageFile>> {
         const response = await fetch("/api/images?folder=" + folder,
             {
                 method: "GET",
@@ -12,7 +12,7 @@
         }
     }
 
-    public async getFolders(page: number, blacklistNumber: number): Promise<PageInfo> {
+    public async folders(page: number, blacklistNumber: number): Promise<PageInfo> {
         const response = await fetch("/api/folders?page=" + page + "&blacklistNumber=" + blacklistNumber,
             {
                 method: "GET",

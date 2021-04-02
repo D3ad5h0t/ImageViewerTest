@@ -1,4 +1,4 @@
-﻿class ViewerImageService {
+﻿class ImageViewer {
 
     static offset = [0, 0];
     static mousePosition: number[];
@@ -10,19 +10,19 @@
     defaultImgPath = "/images/nothing-to-see.jpg";
 
     public init(zoomContainer: string, tableId: string) {
-        ViewerImageService.imgContainer = document.querySelector(`#${zoomContainer}`) as HTMLElement;
-        ViewerImageService.controlsContainer = ViewerImageService.imgContainer.querySelector("#controls-container") as HTMLElement;
-        ViewerImageService.imgTable = ViewerTableService.getTable(tableId);
+        ImageViewer.imgContainer = document.querySelector(`#${zoomContainer}`) as HTMLElement;
+        ImageViewer.controlsContainer = ImageViewer.imgContainer.querySelector("#controls-container") as HTMLElement;
+        ImageViewer.imgTable = OverviewTable.getTable(tableId);
 
-        if (ViewerImageService.imgContainer) {
-            ViewerImageService.img = ViewerImageService.imgContainer.querySelector("#img-zoom") as HTMLImageElement;
-            const maxHeight = ViewerImageService.img.offsetHeight;
+        if (ImageViewer.imgContainer) {
+            ImageViewer.img = ImageViewer.imgContainer.querySelector("#img-zoom") as HTMLImageElement;
+            const maxHeight = ImageViewer.img.offsetHeight;
 
-            ViewerImageService.imgContainer.style.height = `${maxHeight}px`;
-            ViewerImageService.img.style.width = "100%";
+            ImageViewer.imgContainer.style.height = `${maxHeight}px`;
+            ImageViewer.img.style.width = "100%";
 
-            this.setWheelZooming(ViewerImageService.imgContainer, ViewerImageService.img);
-            this.setMoveDirections(ViewerImageService.imgContainer, ViewerImageService.img);
+            this.setWheelZooming(ImageViewer.imgContainer, ImageViewer.img);
+            this.setMoveDirections(ImageViewer.imgContainer, ImageViewer.img);
         }
 
         this.setControlPanelEvents();
@@ -33,7 +33,7 @@
 
             if (event.button == 0) {
                 (event as Event).preventDefault();
-                ViewerImageService.offset = [
+                ImageViewer.offset = [
                     img.offsetLeft - event.clientX,
                     img.offsetTop - event.clientY
                 ];
@@ -86,17 +86,17 @@
     }
 
     private setControlPanelEvents() {
-        const downloadBtn = ViewerImageService.controlsContainer.querySelector("#download-btn");
+        const downloadBtn = ImageViewer.controlsContainer.querySelector("#download-btn");
         if (downloadBtn) {
             downloadBtn.addEventListener("click", this.downloadSelectedImage);
         }
 
-        const reverseBtn = ViewerImageService.controlsContainer.querySelector("#reverse-btn");
+        const reverseBtn = ImageViewer.controlsContainer.querySelector("#reverse-btn");
         if (reverseBtn) {
             reverseBtn.addEventListener("click", this.reverseImage);
         }
 
-        const prevBtn = ViewerImageService.controlsContainer.querySelector("#prev-btn");
+        const prevBtn = ImageViewer.controlsContainer.querySelector("#prev-btn");
         if (prevBtn) {
             prevBtn.addEventListener("click", () => {
                 this.getPrevImage().then(item => {
@@ -105,14 +105,14 @@
                     }
 
                     this.showSelected(item);
-                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
-                    ViewerTableService.selectRow(row);
+                    const row = ImageViewer.imgTable.querySelector("tr[data-index='" + ImageViewer.dataList.indexOf(item) + "']") as HTMLElement;
+                    OverviewTable.selectRow(row);
                 });
 
             });
         }
 
-        const nextBtn = ViewerImageService.controlsContainer.querySelector("#next-btn");
+        const nextBtn = ImageViewer.controlsContainer.querySelector("#next-btn");
         if (nextBtn) {
             nextBtn.addEventListener("click", () => {
                 this.getNextImage().then(item => {
@@ -121,40 +121,40 @@
                     }
 
                     this.showSelected(item);
-                    const row = ViewerImageService.imgTable.querySelector("tr[data-index='" + ViewerImageService.dataList.indexOf(item) + "']") as HTMLElement;
-                    ViewerTableService.selectRow(row);
+                    const row = ImageViewer.imgTable.querySelector("tr[data-index='" + ImageViewer.dataList.indexOf(item) + "']") as HTMLElement;
+                    OverviewTable.selectRow(row);
                 });
             });
         }
     }
 
     private startTrackingMouseMovement(event: MouseEvent) {
-        const maxHeight = ViewerImageService.imgContainer.offsetHeight - ViewerImageService.img.offsetHeight;
-        const maxWidth = ViewerImageService.imgContainer.offsetWidth - ViewerImageService.img.offsetWidth;
-        const currentWidth = +ViewerImageService.img.style.width.replace("%", "");
+        const maxHeight = ImageViewer.imgContainer.offsetHeight - ImageViewer.img.offsetHeight;
+        const maxWidth = ImageViewer.imgContainer.offsetWidth - ImageViewer.img.offsetWidth;
+        const currentWidth = +ImageViewer.img.style.width.replace("%", "");
 
         if (currentWidth > 100) {
-            ViewerImageService.mousePosition = [
+            ImageViewer.mousePosition = [
                 event.clientX,
                 event.clientY
             ];
 
-            const leftOffset = ViewerImageService.mousePosition[0] + ViewerImageService.offset[0];
-            const topOffset = ViewerImageService.mousePosition[1] + ViewerImageService.offset[1];
+            const leftOffset = ImageViewer.mousePosition[0] + ImageViewer.offset[0];
+            const topOffset = ImageViewer.mousePosition[1] + ImageViewer.offset[1];
 
             if (leftOffset > maxWidth && leftOffset < 0) {
-                ViewerImageService.img.style.left = leftOffset + 'px';
+                ImageViewer.img.style.left = leftOffset + 'px';
             }
 
             if (topOffset > maxHeight && topOffset < 0) {
-                ViewerImageService.img.style.top = topOffset + 'px';
+                ImageViewer.img.style.top = topOffset + 'px';
             }
         }
     }
 
     private showControlPanel() {
-        if (!ViewerImageService.img.src.includes(this.defaultImgPath)) {
-            ViewerImageService.controlsContainer.style.visibility = "initial";
+        if (!ImageViewer.img.src.includes(this.defaultImgPath)) {
+            ImageViewer.controlsContainer.style.visibility = "initial";
         }
     }
 
@@ -165,42 +165,42 @@
             !target.classList.contains("img-zoom") &&
             !target.classList.contains("fas") &&
             !target.classList.contains("download-link")) {
-            ViewerImageService.controlsContainer.style.visibility = "hidden";
+            ImageViewer.controlsContainer.style.visibility = "hidden";
         }
     }
 
     private async getPrevImage() {
-        const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary") as HTMLElement;
+        const selectedRow = ImageViewer.imgTable.querySelector(".bg-primary") as HTMLElement;
 
         if (selectedRow && selectedRow.dataset) {
             const currentIndex = +selectedRow.dataset['index'];
 
-            if (currentIndex && currentIndex >= 0 && currentIndex < ViewerImageService.dataList.length) {
-                const row = ViewerImageService.dataList[currentIndex - 1];
+            if (currentIndex && currentIndex >= 0 && currentIndex < ImageViewer.dataList.length) {
+                const row = ImageViewer.dataList[currentIndex - 1];
                 return row;
             }
         }
     }
 
     private async getNextImage() {
-        const selectedRow = ViewerImageService.imgTable.querySelector(".bg-primary") as HTMLElement;
+        const selectedRow = ImageViewer.imgTable.querySelector(".bg-primary") as HTMLElement;
 
         if (selectedRow && selectedRow.dataset) {
             let currentIndex = parseInt(selectedRow.dataset['index']);
 
-            if (currentIndex >= 0 && currentIndex + 1 < ViewerImageService.dataList.length) {
+            if (currentIndex >= 0 && currentIndex + 1 < ImageViewer.dataList.length) {
                 currentIndex++;
-                const row = ViewerImageService.dataList[currentIndex];
+                const row = ImageViewer.dataList[currentIndex];
                 return row;
             }
         }
     }
 
     private downloadSelectedImage(event: Event) {
-        if (ViewerImageService.img) {
+        if (ImageViewer.img) {
             const link = document.createElement('a');
-            link.href = ViewerImageService.img.src;
-            link.download = ViewerImageService.img.src;
+            link.href = ImageViewer.img.src;
+            link.download = ImageViewer.img.src;
             document.body.appendChild(link);
             (link as HTMLElement).classList.add("download-link");
             link.click();
@@ -209,10 +209,10 @@
     }
 
     public reverseImage() {
-        if (ViewerImageService.img) {
-            ViewerImageService.img.style.width = "100%";
-            ViewerImageService.img.style.left = "0px";
-            ViewerImageService.img.style.top = "0px";
+        if (ImageViewer.img) {
+            ImageViewer.img.style.width = "100%";
+            ImageViewer.img.style.left = "0px";
+            ImageViewer.img.style.top = "0px";
         }
     }
 
@@ -227,36 +227,36 @@
 
         if (target) {
             const index = target?.dataset['index'];
-            const image = ViewerImageService.dataList[index];
-            new ViewerImageService().showSelected(image);
+            const image = ImageViewer.dataList[index];
+            new ImageViewer().showSelected(image);
         }
     }
 
     public showSelected(image: ImageFile) {
-        if (ViewerImageService.img) {
+        if (ImageViewer.img) {
             const uploading = document.querySelector("#img-uploading") as HTMLElement;
             if (uploading) {
                 uploading.style.display = 'block';
             }
 
-            ViewerImageService.img.style.width = "100%";
-            ViewerImageService.img.style.left = "0px";
-            ViewerImageService.img.style.top = "0px";
+            ImageViewer.img.style.width = "100%";
+            ImageViewer.img.style.left = "0px";
+            ImageViewer.img.style.top = "0px";
 
-            ViewerImageService.img.addEventListener("load",
+            ImageViewer.img.addEventListener("load",
                 () => {
-                    const maxHeight = (ViewerImageService.img as HTMLElement).offsetHeight;
-                    ViewerImageService.imgContainer.style.height = `${maxHeight}px`;
+                    const maxHeight = (ImageViewer.img as HTMLElement).offsetHeight;
+                    ImageViewer.imgContainer.style.height = `${maxHeight}px`;
                     uploading.style.display = 'none';
                 });
 
-            ViewerImageService.img.src = image['url'];
+            ImageViewer.img.src = image['url'];
         }
     }
 
     public initData(data: ImageFile[]) {
         if (data && data.length > 0) {
-            ViewerImageService.dataList = data;
+            ImageViewer.dataList = data;
         }
     }
 }

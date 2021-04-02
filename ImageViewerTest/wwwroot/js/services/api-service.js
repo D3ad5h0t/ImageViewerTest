@@ -7,8 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-class DataService {
-    getImages(folder) {
+class Api {
+    images(folder) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield fetch("/api/images?folder=" + folder, {
                 method: "GET",
@@ -20,7 +20,7 @@ class DataService {
             }
         });
     }
-    getFolders(page, blacklistNumber) {
+    folders(page, blacklistNumber) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield fetch("/api/folders?page=" + page + "&blacklistNumber=" + blacklistNumber, {
                 method: "GET",
@@ -33,4 +33,4 @@ class DataService {
         });
     }
 }
-//# sourceMappingURL=data-service.js.map
+//# sourceMappingURL=api-service.js.map

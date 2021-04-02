@@ -60,7 +60,7 @@
             </div>
 
             <div class="mb-3">
-                <table class="table viewer-table" id="table-view-1">
+                <table class="table table-view" id="table-view-1">
                     <thead>
                         <tr>
                             <th scope="col"></th>
@@ -94,11 +94,11 @@
     <script src="/js/models/models.js"></script>
 
     <script src="/js/services/loading-service.js"></script>
-    <script src="/js/services/data-service.js"></script>
-    <script src="/js/services/viewer-table-service.js"></script>
+    <script src="/js/services/api-service.js"></script>
+    <script src="/js/services/overview-table-service.js"></script>
     <script>
-        var data = new DataService();
-        var tableViewer = new ViewerTableService();
+        var data = new Api();
+        var tableViewer = new OverviewTable();
 
         document.addEventListener("DOMContentLoaded", async () => {
             LoadingService.start();
@@ -108,7 +108,7 @@
         });
 
         function initPage(page = 1, blacklistNumber = 0) {
-            data.getFolders(page, blacklistNumber).then(res => {
+            data.folders(page, blacklistNumber).then(res => {
                 if (res) {
                     const tbody = document.querySelector("tbody");
                     tbody.innerHTML = '';
@@ -144,14 +144,14 @@
             pageItems.forEach(item => {
                 item.addEventListener("click", event => {
                     const item = event.target;
-                    const currentPage = pagination.querySelector(".page-item.active");
+                    const currentPage = +pagination.querySelector(".page-item.active").textContent;
                     let page = 0;
 
                     if (item && currentPage) {
-                        if (item.textContent == '«') {
-                            page = +currentPage.textContent - 1;
+                        if (item.textContent == '«' && currentPage > 0) {
+                            page = currentPage - 1;
                         } else if (item.textContent == '»') {
-                            page = +currentPage.textContent + 1;
+                            page = currentPage + 1;
                         } else {
                             page = +item.textContent;
                         }
